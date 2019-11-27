@@ -69,11 +69,28 @@ PROCESS {
                                             'ErrorVariable'='ErrorInstance'}
 
                 Get-CimInstance @ciminstance_parameters | Where-Object {$_.Name -notmatch $Reg_Exclued}   
+
+                Write-Verbose "Closing connection to $computer."
+                $session | Remove-CimSession
+
             } #Try
             Catch{
+                # Catch error creating new session
+                if($ErrorSession){
+                    Write-Warning "$computer : Could not connect over WSMAN."
+                    $NextComputer = $true
+                }
+
+                # Catch error getting CimInstance, and close connection
+                if($ErrorInstance){
+                    Write-Warning "$computer : Could not retrive info about services."
+                    Write-Verbose "Closing connection to $computer."
+                    $session | Remove-CimSession
+                    $NextComputer = $true
+                }
 
             } #Catch
-        } Until ($Whatever)
+        } Until ($NextComputer)
     
     } #Foreach
 
