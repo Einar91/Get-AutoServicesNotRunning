@@ -70,8 +70,12 @@ PROCESS {
 
                 Get-CimInstance @ciminstance_parameters | Where-Object {$_.Name -notmatch $Reg_Exclued}   
 
+                # Close session to computer
                 Write-Verbose "Closing connection to $computer."
                 $session | Remove-CimSession
+
+                # End our DO loop
+                $NextComputer = $True
 
             } #Try
             Catch{
